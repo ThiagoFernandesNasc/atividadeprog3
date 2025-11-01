@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API de Usuários - Interface</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .tab-button {
+            padding: 12px 24px;
+            background: white;
+            border: none;
+            border-radius: 8px 8px 0 0;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s;
+            color: #667eea;
+        }
+
+        .tab-button:hover {
+            background: #f0f0f0;
+            transform: translateY(-2px);
+        }
+
+        .tab-button.active {
+            background: #764ba2;
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+            background: white;
+            padding: 30px;
+            border-radius: 0 8px 8px 8px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .user-list {
+            display: grid;
+            gap: 20px;
+        }
+
+        .user-card {
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            background: #f9f9f9;
+            transition: all 0.3s;
+        }
+
+        .user-card:hover {
+            border-color: #667eea;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .user-card h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .user-card p {
+            margin: 5px 0;
+            color: #666;
+        }
+
+        .user-card .endereco {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 10px;
+            border-left: 4px solid #764ba2;
+        }
+
+        .user-card .actions {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-edit {
+            background: #4CAF50;
+        }
+
+        .btn-delete {
+            background: #f44336;
+        }
+
+        .message {
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .message.show {
+            display: block;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>👥 API de Usuários</h1>
+
+        <div id="message" class="message"></div>
+
+        <div class="tabs">
+            <button class="tab-button active" onclick="showTab('create')">Criar Usuário</button>
+            <button class="tab-button" onclick="showTab('list')">Listar Usuários</button>
+            <button class="tab-button" onclick="showTab('search')">Buscar Usuário</button>
+            <button class="tab-button" onclick="showTab('update')">Atualizar Usuário</button>
+            <button class="tab-button" onclick="showTab('delete')">Deletar Usuário</button>
+        </div>
+
+        <!-- Criar Usuário -->
+        <div id="create" class="tab-content active">
+            <h2>Criar Novo Usuário</h2>
+            <form id="createForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="createNome">Nome:</label>
+                        <input type="text" id="createNome" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="createEmail">Email:</label>
+                        <input type="email" id="createEmail" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="createCep">CEP (opcional):</label>
+                    <input type="text" id="createCep" placeholder="00000-000" maxlength="9" 
+                           pattern="[0-9]{5}-?[0-9]{3}" 
+                           oninput="this.value = this.value.replace(/[^0-9-]/g, '').replace(/(\d{5})(\d{3})/, '$1-$2')">
+                    <small style="color: #666; font-size: 14px;">Digite o CEP para buscar o endereço automaticamente OU informe os campos abaixo</small>
+                </div>
+                <h3 style="margin: 20px 0 10px 0; color: #667eea;">Ou informe o endereço manualmente:</h3>
+                <div class="form-group">
+                    <label for="createLogradouro">Logradouro:</label>
+                    <input type="text" id="createLogradouro" placeholder="Rua, Avenida, etc.">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="createBairro">Bairro:</label>
+                        <input type="text" id="createBairro" placeholder="Nome do bairro">
+                    </div>
+                    <div class="form-group">
+                        <label for="createEstado">Estado:</label>
+                        <input type="text" id="createEstado" placeholder="SP, RJ, MG, etc." maxlength="2">
+                    </div>
+                </div>
+                <button type="submit">Criar Usuário</button>
+            </form>
+        </div>
+
+        <!-- Listar Usuários -->
+        <div id="list" class="tab-content">
+            <h2>Lista de Usuários</h2>
+            <button onclick="loadUsers()" style="margin-bottom: 20px;">Atualizar Lista</button>
+            <div id="userList" class="user-list"></div>
+        </div>
+
+        <!-- Buscar Usuário -->
+        <div id="search" class="tab-content">
+            <h2>Buscar Usuário por ID</h2>
+            <form id="searchForm">
+                <div class="form-group">
+                    <label for="searchId">ID do Usuário:</label>
+                    <input type="number" id="searchId" required>
+                </div>
+                <button type="submit">Buscar</button>
+            </form>
+            <div id="searchResult" style="margin-top: 20px;"></div>
+        </div>
+
+        <!-- Atualizar Usuário -->
+        <div id="update" class="tab-content">
+            <h2>Atualizar Usuário</h2>
+            <form id="updateForm">
+                <div class="form-group">
+                    <label for="updateId">ID do Usuário:</label>
+                    <input type="number" id="updateId" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="updateNome">Nome:</label>
+                        <input type="text" id="updateNome" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="updateEmail">Email:</label>
+                        <input type="email" id="updateEmail" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="updateCep">CEP (opcional):</label>
+                    <input type="text" id="updateCep" placeholder="00000-000" maxlength="9" 
+                           pattern="[0-9]{5}-?[0-9]{3}" 
+                           oninput="this.value = this.value.replace(/[^0-9-]/g, '').replace(/(\d{5})(\d{3})/, '$1-$2')">
+                    <small style="color: #666; font-size: 14px;">Digite o CEP para buscar o endereço automaticamente OU informe os campos abaixo</small>
+                </div>
+                <h3 style="margin: 20px 0 10px 0; color: #667eea;">Ou informe o endereço manualmente:</h3>
+                <div class="form-group">
+                    <label for="updateLogradouro">Logradouro:</label>
+                    <input type="text" id="updateLogradouro" placeholder="Rua, Avenida, etc.">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="updateBairro">Bairro:</label>
+                        <input type="text" id="updateBairro" placeholder="Nome do bairro">
+                    </div>
+                    <div class="form-group">
+                        <label for="updateEstado">Estado:</label>
+                        <input type="text" id="updateEstado" placeholder="SP, RJ, MG, etc." maxlength="2">
+                    </div>
+                </div>
+                <button type="submit">Atualizar Usuário</button>
+            </form>
+        </div>
+
+        <!-- Deletar Usuário -->
+        <div id="delete" class="tab-content">
+            <h2>Deletar Usuário</h2>
+            <form id="deleteForm">
+                <div class="form-group">
+                    <label for="deleteId">ID do Usuário:</label>
+                    <input type="number" id="deleteId" required>
+                </div>
+                <button type="submit" class="btn-delete">Deletar Usuário</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:8080/users';
+
+        function showTab(tabName) {
+            // Esconder todas as tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // Mostrar a tab selecionada
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function showMessage(text, type) {
+            const messageDiv = document.getElementById('message');
+            messageDiv.textContent = text;
+            messageDiv.className = `message ${type} show`;
+            setTimeout(() => {
+                messageDiv.classList.remove('show');
+            }, 5000);
+        }
+
+        // Criar Usuário
+        document.getElementById('createForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const nome = document.getElementById('createNome').value;
+            const email = document.getElementById('createEmail').value;
+            const cep = document.getElementById('createCep').value.replace(/-/g, '');
+            const logradouro = document.getElementById('createLogradouro').value;
+            const bairro = document.getElementById('createBairro').value;
+            const estado = document.getElementById('createEstado').value;
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ 
+                        nome, 
+                        email, 
+                        cep: cep || null,
+                        logradouro: logradouro || null,
+                        bairro: bairro || null,
+                        estado: estado || null
+                    })
+                });
+
+                if (response.ok) {
+                    showMessage('Usuário criado com sucesso!', 'success');
+                    document.getElementById('createForm').reset();
+                    loadUsers();
+                } else {
+                    showMessage('Erro ao criar usuário', 'error');
+                }
+            } catch (error) {
+                showMessage('Erro ao criar usuário: ' + error.message, 'error');
+            }
+        });
+
+        // Listar Usuários
+        async function loadUsers() {
+            try {
+                const response = await fetch(API_URL);
+                const users = await response.json();
+
+                const userListDiv = document.getElementById('userList');
+                if (users.length === 0) {
+                    userListDiv.innerHTML = '<p>Nenhum usuário encontrado.</p>';
+                    return;
+                }
+
+                userListDiv.innerHTML = users.map(user => `
+                    <div class="user-card">
+                        <h3>${user.name}</h3>
+                        <p><strong>ID:</strong> ${user.id}</p>
+                        <p><strong>Email:</strong> ${user.email}</p>
+                        ${user.endereco ? `
+                            <div class="endereco">
+                                <p><strong>📍 Endereço:</strong></p>
+                                <p><strong>CEP:</strong> ${user.endereco.cep || 'N/A'}</p>
+                                <p><strong>Logradouro:</strong> ${user.endereco.logradouro || 'N/A'}</p>
+                                <p><strong>Bairro:</strong> ${user.endereco.bairro || 'N/A'}</p>
+                                <p><strong>Estado:</strong> ${user.endereco.estado || 'N/A'}</p>
+                            </div>
+                        ` : ''}
+                        <div class="actions">
+                            <button class="btn-edit" onclick="editUser(${user.id})">Editar</button>
+                            <button class="btn-delete" onclick="deleteUser(${user.id})">Deletar</button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                showMessage('Erro ao carregar usuários: ' + error.message, 'error');
+            }
+        }
+
+        // Buscar Usuário
+        document.getElementById('searchForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('searchId').value;
+
+            try {
+                const response = await fetch(`${API_URL}/${id}`);
+                if (response.ok) {
+                    const user = await response.json();
+                    const resultDiv = document.getElementById('searchResult');
+                    resultDiv.innerHTML = `
+                        <div class="user-card">
+                            <h3>${user.name}</h3>
+                            <p><strong>ID:</strong> ${user.id}</p>
+                            <p><strong>Email:</strong> ${user.email}</p>
+                            ${user.endereco ? `
+                                <div class="endereco">
+                                    <p><strong>📍 Endereço:</strong></p>
+                                    <p><strong>CEP:</strong> ${user.endereco.cep || 'N/A'}</p>
+                                    <p><strong>Logradouro:</strong> ${user.endereco.logradouro || 'N/A'}</p>
+                                    <p><strong>Bairro:</strong> ${user.endereco.bairro || 'N/A'}</p>
+                                    <p><strong>Estado:</strong> ${user.endereco.estado || 'N/A'}</p>
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                } else {
+                    showMessage('Usuário não encontrado', 'error');
+                    document.getElementById('searchResult').innerHTML = '';
+                }
+            } catch (error) {
+                showMessage('Erro ao buscar usuário: ' + error.message, 'error');
+            }
+        });
+
+        // Atualizar Usuário
+        document.getElementById('updateForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('updateId').value;
+            const nome = document.getElementById('updateNome').value;
+            const email = document.getElementById('updateEmail').value;
+            const cep = document.getElementById('updateCep').value.replace(/-/g, '');
+            const logradouro = document.getElementById('updateLogradouro').value;
+            const bairro = document.getElementById('updateBairro').value;
+            const estado = document.getElementById('updateEstado').value;
+
+            try {
+                const response = await fetch(`${API_URL}/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ 
+                        nome, 
+                        email, 
+                        cep: cep || null,
+                        logradouro: logradouro || null,
+                        bairro: bairro || null,
+                        estado: estado || null
+                    })
+                });
+
+                if (response.ok || response.status === 204) {
+                    showMessage('Usuário atualizado com sucesso!', 'success');
+                    document.getElementById('updateForm').reset();
+                    loadUsers();
+                } else {
+                    showMessage('Erro ao atualizar usuário', 'error');
+                }
+            } catch (error) {
+                showMessage('Erro ao atualizar usuário: ' + error.message, 'error');
+            }
+        });
+
+        // Deletar Usuário
+        document.getElementById('deleteForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('deleteId').value;
+
+            if (!confirm(`Tem certeza que deseja deletar o usuário ${id}?`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/${id}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok || response.status === 204) {
+                    showMessage('Usuário deletado com sucesso!', 'success');
+                    document.getElementById('deleteForm').reset();
+                    loadUsers();
+                } else {
+                    showMessage('Erro ao deletar usuário', 'error');
+                }
+            } catch (error) {
+                showMessage('Erro ao deletar usuário: ' + error.message, 'error');
+            }
+        });
+
+        // Funções auxiliares
+        async function editUser(id) {
+            try {
+                const response = await fetch(`${API_URL}/${id}`);
+                if (response.ok) {
+                    const user = await response.json();
+                    showTab('update');
+                    document.getElementById('updateId').value = user.id;
+                    document.getElementById('updateNome').value = user.name;
+                    document.getElementById('updateEmail').value = user.email;
+                    
+                    // Preenche endereço se existir
+                    if (user.endereco) {
+                        document.getElementById('updateCep').value = user.endereco.cep || '';
+                        document.getElementById('updateLogradouro').value = user.endereco.logradouro || '';
+                        document.getElementById('updateBairro').value = user.endereco.bairro || '';
+                        document.getElementById('updateEstado').value = user.endereco.estado || '';
+                    } else {
+                        document.getElementById('updateCep').value = '';
+                        document.getElementById('updateLogradouro').value = '';
+                        document.getElementById('updateBairro').value = '';
+                        document.getElementById('updateEstado').value = '';
+                    }
+                }
+            } catch (error) {
+                showMessage('Erro ao carregar dados do usuário: ' + error.message, 'error');
+            }
+        }
+
+        async function deleteUser(id) {
+            if (!confirm(`Tem certeza que deseja deletar o usuário ${id}?`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/${id}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok || response.status === 204) {
+                    showMessage('Usuário deletado com sucesso!', 'success');
+                    loadUsers();
+                } else {
+                    showMessage('Erro ao deletar usuário', 'error');
+                }
+            } catch (error) {
+                showMessage('Erro ao deletar usuário: ' + error.message, 'error');
+            }
+        }
+
+        // Carregar usuários ao abrir a aba de listagem
+        document.querySelector('[onclick="showTab(\'list\')"]').addEventListener('click', () => {
+            loadUsers();
+        });
+    </script>
+</body>
+</html>
+
